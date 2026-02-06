@@ -19,7 +19,7 @@ root.render(
       })}
     >
       <CssBaseline />
-      <BrowserRouter>
+      <BrowserRouter basename="/ai-react">
         <App />
       </BrowserRouter>
     </ThemeProvider>
