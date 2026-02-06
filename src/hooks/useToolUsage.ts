@@ -5,6 +5,12 @@ const STORAGE_KEY = 'tool-usage';
 
 const INITIAL_TOOLS: Omit<Tool, 'usageCount'>[] = [
   {
+    id: 'camera-tool',
+    name: 'Camera Tool',
+    description:
+      'Access your webcam or phone camera to capture photos or short videos for testing and upload.',
+  },
+  {
     id: 'api-tester',
     name: 'API Tester (Placeholder)',
     description:
