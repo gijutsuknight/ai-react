@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Alert, Box, Button, Stack, Typography } from '@mui/material';
+import { getApiBaseUrl, UPLOAD_FILE_PATH } from '../config/api';
 
 type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
 
@@ -178,8 +179,7 @@ export const CameraTool: React.FC = () => {
       const formData = new FormData();
       formData.append('file', blob, filename);
 
-      const apiBase = process.env.REACT_APP_API_BASE_URL ?? '';
-      const response = await fetch(`${apiBase}/api/upload/file`, {
+      const response = await fetch(`${getApiBaseUrl()}${UPLOAD_FILE_PATH}`, {
         method: 'POST',
         body: formData,
       });
