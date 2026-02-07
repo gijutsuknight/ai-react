@@ -49,7 +49,9 @@ From a clean machine, follow these steps to get the project running:
    npm start
    ```
 
-   - Opens the app at `http://localhost:3000/`
+   - By default, CRA serves on `http://localhost:3000/`
+   - This app is configured with a base path of `/ai-react`, so the main UI is available at:
+     - `http://localhost:3000/ai-react` during local development
    - The page reloads automatically when you edit files
    - TypeScript and lint issues will appear in the console
 
@@ -60,6 +62,23 @@ From a clean machine, follow these steps to get the project running:
    ```
 
    - Outputs an optimized production build into the `build` directory
+
+---
+
+## How to access the app
+
+- **Local development**
+  - Start the dev server with `npm start`.
+  - Open `http://localhost:3000/ai-react` in your browser.
+- **After deployment**
+  - The app assumes it is hosted under the `/ai-react` path.
+  - If you deploy to `https://your-domain.com`, the app should be reachable at:
+    - `https://your-domain.com/ai-react/`
+
+If you decide to host the app at a different base path, update:
+
+- `"homepage"` in `package.json`
+- The `basename` prop in `src/index.tsx` (`<BrowserRouter basename="/ai-react">`)
 
 ---
 
@@ -155,12 +174,55 @@ This design keeps the home page as a **central launcher** for multiple tools, wh
 
 ---
 
+## Deployment notes and recommendations
+
+- **Create a production build**
+  - Run:
+
+    ```bash
+    npm run build
+    ```
+
+  - This generates a static bundle in the `build` directory that respects the `/ai-react` base path configured in:
+    - `package.json` via `"homepage": "/ai-react"`
+    - `src/index.tsx` via `BrowserRouter basename="/ai-react"`.
+
+- **Serve the build locally for testing**
+
+  ```bash
+  npx serve -s build
+  ```
+
+  - Then open the URL printed in the terminal, typically `http://localhost:3000/ai-react`.
+
+- **Deploying to a static host (S3, Netlify, etc.)**
+  - Build the app: `npm run build`.
+  - Upload everything inside the `build` folder to your host.
+  - Ensure your host:
+    - Serves `index.html` for any route under `/ai-react/*` (SPA fallback).
+    - Serves JS/CSS assets from the same `/ai-react` base path.
+
+- **Hosting at a different path or at domain root**
+  - If you host at the domain root (`https://your-domain.com/`):
+    - Change `"homepage"` in `package.json` to `"."` (or remove it).
+    - Update `BrowserRouter` in `src/index.tsx` to remove the basename:
+
+      ```tsx
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+      ```
+
+    - Re-run `npm run build` and redeploy the new `build` folder.
+
+---
+
 ## Notes and recommendations
 
 - This project is intended for **testing and experimentation**, so feel free to:
   - Add more placeholder modules.
   - Swap out MUI components or customize the MUI theme.
-  - Introduce routing if tools grow in complexity.
+  - Adjust the **base path** if your hosting setup changes (update `"homepage"` and `basename`).
 - If you change the way tools are stored or identified, ensure that:
   - Each tool still has a **stable, unique `id`**.
   - The usage tracking logic in `useToolUsage` is updated accordingly.

@@ -196,21 +196,22 @@ export const CameraToolDialog: React.FC<CameraToolDialogProps> = ({
       const formData = new FormData();
       formData.append('file', blob, filename);
 
-      // Placeholder backend endpoint: adjust to your actual API.
-      const response = await fetch('/api/upload', {
+      const apiBase = process.env.REACT_APP_API_BASE_URL ?? '';
+      const response = await fetch(`${apiBase}/api/upload/file`, {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message ?? 'Upload failed');
       }
 
       setUploadStatus('success');
     } catch (err) {
       setUploadStatus('error');
       setError(
-        'Failed to upload media. Ensure your backend is running and /api/upload is implemented.'
+        err instanceof Error ? err.message : 'Failed to upload media. Ensure your backend is running at /api/upload/file.'
       );
     }
   };
