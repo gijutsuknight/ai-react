@@ -6,6 +6,9 @@ type UploadStatus = 'idle' | 'uploading' | 'success' | 'error';
 export const CameraTool: React.FC = () => {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const streamRef = React.useRef<MediaStream | null>(null);
+  const photoUrlRef = React.useRef<string | null>(null);
+  const videoUrlRef = React.useRef<string | null>(null);
 
   const [stream, setStream] = React.useState<MediaStream | null>(null);
   const [isRecording, setIsRecording] = React.useState(false);
@@ -17,11 +20,15 @@ export const CameraTool: React.FC = () => {
   const [uploadStatus, setUploadStatus] = React.useState<UploadStatus>('idle');
 
   const stopStream = React.useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
     setStream(null);
-  }, [stream]);
+  }, []);
 
   const resetMedia = React.useCallback(() => {
     if (photoUrl) {
@@ -52,6 +59,7 @@ export const CameraTool: React.FC = () => {
         audio: true,
       });
 
+      streamRef.current = mediaStream;
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
@@ -191,13 +199,27 @@ export const CameraTool: React.FC = () => {
   };
 
   React.useEffect(() => {
+    photoUrlRef.current = photoUrl;
+    videoUrlRef.current = videoUrl;
+  }, [photoUrl, videoUrl]);
+
+  React.useEffect(() => {
     return () => {
-      stopStream();
-      resetMedia();
-      setError(null);
-      setUploadStatus('idle');
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+      if (photoUrlRef.current) {
+        URL.revokeObjectURL(photoUrlRef.current);
+      }
+      if (videoUrlRef.current) {
+        URL.revokeObjectURL(videoUrlRef.current);
+      }
     };
-  }, [stopStream, resetMedia]);
+  }, []);
 
   return (
     <Stack spacing={2}>
